@@ -139,7 +139,12 @@ function renderizarItens(categoriaFiltro) {
                 </div>
                 <div class="p-4 flex-1 flex flex-col">
                     <div class="flex justify-between items-start mb-2">
-                        <h3 class="font-bold text-gray-800 text-lg leading-tight">${item.Item}</h3>
+                        <div class="flex justify-between items-start mb-2 gap-2">
+                            <h3 class="font-bold text-gray-800 text-lg leading-tight">${item.Item}</h3>
+                            <button onclick="abrirEdicao(${item.ID})" class="text-casanova-secondary hover:text-casanova-primary transition-colors">
+                            <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
                     </div>
                     <div class="text-xs text-gray-500 mb-3 space-x-1">
                         <span class="bg-casanova-primary bg-opacity-20 text-casanova-primary px-2 py-1 rounded">${item.Categoria}</span>
