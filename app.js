@@ -53,6 +53,7 @@ async function salvarItem(evento) {
         }
     });
 
+    const idAtual = document.getElementById('input-id').value; //
     // 2. Montar o Objeto (As chaves precisam bater com as colunas do seu Sheets)
     const novoItem = {
         action: idAtual ? "edit" : "add",
