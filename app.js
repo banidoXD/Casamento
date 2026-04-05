@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwBP-FQ7EzCFSldwjZJNl3Zo-8Pq4PBcLjdd1UZUEBVMHf80fd21UKgZPKLGzx66P2UlA/exec"; // <-- NÃO ESQUEÇA DE COLAR SUA URL NOVA
+const API_URL = "https://script.google.com/macros/s/AKfycbwtO0nqPVsxFJaGpIcsUYk7egfXvYtq_kjO7BSXJxzvfxnvkQu2Ancz74SWt6osLEW0sg/exec"; // <-- NÃO ESQUEÇA DE COLAR SUA URL NOVA
 let estadoItens = [];
 let filtroAtivo = 'Todas';
 
