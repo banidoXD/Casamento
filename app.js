@@ -251,3 +251,63 @@ function resetarLinks() {
     `;
     container.innerHTML = htmlPadrao;
 }
+
+// Preenche o formulário com os dados do item clicado
+window.abrirEdicao = function(id) {
+    const item = estadoItens.find(i => i.ID == id);
+    if (!item) return;
+
+    document.getElementById('input-id').value = item.ID;
+    document.getElementById('input-nome').value = item.Item;
+    document.getElementById('input-categoria').value = item.Categoria || 'Cozinha';
+    document.getElementById('input-status').value = item.Status || 'Pendente';
+    
+    // Ajuste para prioridade caso esteja só o número na planilha
+    const selectPrioridade = document.getElementById('input-prioridade');
+    Array.from(selectPrioridade.options).forEach(opt => {
+        if (opt.value.startsWith(item.Prioridade)) opt.selected = true;
+    });
+
+    document.getElementById('input-valor-estimado').value = item.ValorEstimado || '';
+    document.getElementById('input-valor-pago').value = item.ValorPago || '';
+    document.getElementById('input-tags').value = item.Tags || '';
+    document.getElementById('input-imagem').value = item.ImagemURL || '';
+    document.getElementById('input-obs').value = item.Observacoes || '';
+
+    // Lógica para remontar os links dinâmicos
+    const container = document.getElementById('links-container');
+    container.innerHTML = ''; // limpa os inputs vazios
+    try {
+        const links = item.Links ? JSON.parse(item.Links) : [];
+        if (links.length === 0) throw new Error("Sem links"); // forçar cair no catch para criar 1 vazio
+        
+        links.forEach(l => {
+            container.insertAdjacentHTML('beforeend', `
+                <div class="flex gap-2 link-row mt-2">
+                    <input type="text" value="${l.loja}" class="w-1/3 p-2 border border-gray-300 rounded text-sm outline-none link-loja">
+                    <input type="url" value="${l.url}" class="w-2/3 p-2 border border-gray-300 rounded text-sm outline-none link-url">
+                    <button type="button" class="text-red-500 hover:text-red-700 px-2 btn-remove-link"><i class="fas fa-trash"></i></button>
+                </div>
+            `);
+        });
+        
+        // Re-atrelar eventos de lixeira
+        document.querySelectorAll('.btn-remove-link').forEach(btn => {
+            btn.addEventListener('click', (e) => e.target.closest('.link-row').remove());
+        });
+    } catch (e) {
+        resetarLinks(); // se der erro ou estiver vazio, cria 1 linha limpa padrão
+    }
+
+    document.querySelector('#item-modal h2').innerText = "Editar Item";
+    document.getElementById('item-modal').classList.remove('hidden');
+}
+
+// Quando clicar em "Novo Item", precisamos limpar o input-id escondido
+document.getElementById('btn-open-modal').addEventListener('click', () => {
+    document.getElementById('input-id').value = '';
+    document.getElementById('item-form').reset();
+    resetarLinks();
+    document.querySelector('#item-modal h2').innerText = "Adicionar Novo Item";
+    document.getElementById('item-modal').classList.remove('hidden');
+});
