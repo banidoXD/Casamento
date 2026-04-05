@@ -2,7 +2,7 @@
 // CONFIGURAÇÕES
 // ==========================================
 // Cole aqui a URL gerada no "Implantar > Nova Implantação" do Google Apps Script
-const API_URL = "SUA_URL_DO_WEB_APP_AQUI";
+const API_URL = "https://script.google.com/macros/s/AKfycbz9mo4eR0VjC0YU8-1o81vXVJuDf44rYn_pL4LdoWzhbs61WGA3L8yuAg8agoCeRYnxyA/exec";
 
 // Estado global para guardar os itens e não precisar fazer requisição toda hora
 let estadoItens = [];
