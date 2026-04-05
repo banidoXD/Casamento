@@ -55,7 +55,8 @@ async function salvarItem(evento) {
 
     // 2. Montar o Objeto (As chaves precisam bater com as colunas do seu Sheets)
     const novoItem = {
-        ID: Date.now(), // ID único simples
+        action: idAtual ? "edit" : "add",
+        ID: idAtual ? idAtual : Date.now(),
         Item: document.getElementById('input-nome').value.trim(),
         Categoria: document.getElementById('input-categoria').value,
         Prioridade: document.getElementById('input-prioridade').value,
