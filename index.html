@@ -13,11 +13,42 @@
 </head>
 <body class="bg-casanova-bg text-gray-700 font-sans p-4 md:p-8">
 
-    <header class="max-w-6xl mx-auto mb-8 text-center">
-       <h1 class="text-4xl md:text-5xl font-bold text-casanova-primary mb-2 tracking-wide" style="font-family: serif;">
-            <i class="fas fa-home mr-2"></i> NOSSA CASA
+<header class="max-w-6xl mx-auto mb-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-bold text-casanova-primary mb-2 tracking-wide" style="font-family: serif;">
+
+            <i class="fas fa-home mr-2"></i>Nossa Casa
+
         </h1>
         
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <p class="text-[10px] uppercase font-bold text-gray-400">Total Estimado</p>
+                <p class="text-lg font-bold" id="total-estimado">R$ 0,00</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-green-100">
+                <p class="text-[10px] uppercase font-bold text-green-400">Já Pago</p>
+                <p class="text-lg font-bold text-green-600" id="total-pago">R$ 0,00</p>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-red-100">
+                <p class="text-[10px] uppercase font-bold text-red-400">A Pagar (Total)</p>
+                <p class="text-lg font-bold text-red-500" id="total-divida">R$ 0,00</p>
+            </div>
+            <div class="bg-casanova-secondary bg-opacity-10 p-4 rounded-xl shadow-sm border border-casanova-secondary">
+                <p class="text-[10px] uppercase font-bold text-casanova-secondary">Parcelas Próx. Mês</p>
+                <p class="text-lg font-bold text-gray-700" id="total-proximo-mes">R$ 0,00</p>
+            </div>
+        </div>
+
+        <div class="max-w-xl mx-auto mb-8">
+            <div class="flex justify-between text-[11px] font-bold mb-1 px-1">
+                <span class="text-casanova-primary">Progresso do Enxoval</span>
+                <span id="progress-text">0%</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progress-bar-geral" class="bg-casanova-primary h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
+            </div>
+        </div>
+
         <div class="bg-white p-4 rounded-2xl shadow-sm space-y-4 border border-gray-50">
             <div class="flex flex-col md:flex-row gap-4">
                 <div class="relative flex-1">
