@@ -13,12 +13,30 @@ async function carregarItens() {
     grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-4"></i><p class="font-bold tracking-widest uppercase text-xs">Sincronizando com a planilha...</p></div>`;
 
     try {
-        const response = await fetch(API_URL);
-        estadoItens = await response.json();
+        // Adicionando um timestamp para evitar cache e garantindo o redirect
+        const urlComCacheBuster = API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
+        
+        console.log("Solicitando dados de:", urlComCacheBuster);
+
+        const response = await fetch(urlComCacheBuster, {
+            method: 'GET',
+            mode: 'cors', // Garante que o navegador trate como requisição cross-origin
+            redirect: 'follow' // Instrução explícita para seguir o redirecionamento do Google
+        });
+
+        if (!response.ok) {
+            throw new Error(`Erro HTTP: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log("Dados recebidos com sucesso:", data);
+        
+        estadoItens = data;
         renderizarItens();
         atualizarDashboard();
     } catch (e) {
-        grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10 font-bold">Erro de conexão. Verifique o link da API.</div>`;
+        console.error("Erro detalhado na captura dos dados:", e);
+        grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10 font-bold">Erro de conexão. Verifique o Console (F12) para detalhes técnicos.</div>`;
     }
 }
 
