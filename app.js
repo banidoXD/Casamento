@@ -49,13 +49,14 @@ async function carregarItens() {
     }
 }
 
-// === RENDERIZAÇÃO COMPRAS (Idêntico ao que funcionava) ===
+// === RENDERIZAÇÃO COMPRAS (AGORA COM ORDENAÇÃO) ===
 function renderizarItens() {
     const grid = document.getElementById('items-grid');
     const busca = document.getElementById('search-bar').value.toLowerCase().trim();
+    const sortOrder = document.getElementById('sort-order').value; // Pega a ordem escolhida
     grid.innerHTML = '';
 
-    const filtrados = estadoCompras.filter(item => {
+    let filtrados = estadoCompras.filter(item => {
         const matchBusca = (item.Item || '').toLowerCase().includes(busca) || (item.Tags || '').toLowerCase().includes(busca);
         const matchCategoria = filtroCategoria === 'Todas' || item.Categoria === filtroCategoria;
         
@@ -72,13 +73,23 @@ function renderizarItens() {
         return matchBusca && matchCategoria && matchStatus;
     });
 
+    // LÓGICA DE ORDENAÇÃO ALFABÉTICA E PRIORIDADE
+    filtrados.sort((a, b) => {
+        if (sortOrder === 'az') return a.Item.localeCompare(b.Item);
+        if (sortOrder === 'za') return b.Item.localeCompare(a.Item);
+        if (sortOrder === 'prioridade') return a.Prioridade.localeCompare(b.Prioridade);
+        return 0; // 'padrao' mantém a ordem do Sheets (mais antigos primeiro)
+    });
+
     if (filtrados.length === 0) return grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">Nenhum item.</div>`;
 
     filtrados.forEach(item => {
         const pagas = parseInt(item.ParcelasPagas) || 0;
         const total = parseInt(item.QtdParcelas) || 1;
         const perc = (pagas / total) * 100;
-        const imagem = item.ImagemURL || 'https://via.placeholder.com/400x300?text=Casa+Nova';
+        
+        // NOVO PLACEHOLDER (Cor Rosa do Tema)
+        const imagem = item.ImagemURL || 'https://placehold.co/400x300/D1A3B4/FFFFFF?text=Casa+Nova';
         
         let tagsHtml = item.Tags ? `<div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-gray-100">` + item.Tags.split(',').map(t => `<span onclick="filtrarPorTag('${t.trim()}')" class="cursor-pointer bg-gray-100 hover:bg-casanova-primary hover:text-white text-gray-500 px-1.5 py-0.5 rounded border text-[9px] font-bold uppercase transition-colors">#${t.trim()}</span>`).join('') + `</div>` : '';
 
@@ -307,9 +318,31 @@ function uiCriarLinhaLink(l, u) { document.getElementById('links-container').ins
 function configurarEventosUI() {
     document.getElementById('item-form').onsubmit = salvarItem;
     document.getElementById('search-bar').oninput = renderizarItens;
+    
+    // Novo evento de Ordenação
+    document.getElementById('sort-order').onchange = renderizarItens;
+    
     document.getElementById('btn-open-modal').onclick = () => { const btnSalvar = document.querySelector('#item-form button[type="submit"]'); btnSalvar.innerHTML = 'SALVAR ITEM'; btnSalvar.disabled = false; document.getElementById('item-form').reset(); document.getElementById('input-id').value = ''; document.getElementById('checklist-origin-id').value = ''; document.getElementById('links-container').innerHTML = ''; uiCriarLinhaLink('', ''); document.getElementById('btn-delete-trigger').classList.add('hidden'); uiToggleCampos(); document.getElementById('modal-title').innerText = "Adicionar Novo Item"; document.getElementById('item-modal').classList.remove('hidden'); };
-    document.getElementById('category-filters').onclick = (e) => { if(e.target.tagName === 'BUTTON') { document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-gray-100 text-gray-500"); e.target.className = "cat-btn active px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-casanova-primary text-white"; filtroCategoria = e.target.innerText.trim(); renderizarItens(); } };
-    document.getElementById('status-filters').onclick = (e) => { if(e.target.tagName === 'BUTTON') { document.querySelectorAll('.status-btn').forEach(b => b.className = "status-btn px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-100 text-gray-500"); e.target.className = "status-btn active px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-800 text-white"; filtroStatus = e.target.innerText.trim(); renderizarItens(); } };
+    
+    // Filtro de Categoria (CORRIGIDO textContent)
+    document.getElementById('category-filters').onclick = (e) => { 
+        if(e.target.tagName === 'BUTTON') { 
+            document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-gray-100 text-gray-500"); 
+            e.target.className = "cat-btn active px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-casanova-primary text-white"; 
+            filtroCategoria = e.target.textContent.trim(); 
+            renderizarItens(); 
+        } 
+    };
+    
+    // Filtro de Status (CORRIGIDO textContent)
+    document.getElementById('status-filters').onclick = (e) => { 
+        if(e.target.tagName === 'BUTTON') { 
+            document.querySelectorAll('.status-btn').forEach(b => b.className = "status-btn px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-100 text-gray-500"); 
+            e.target.className = "status-btn active px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-800 text-white"; 
+            filtroStatus = e.target.textContent.trim(); 
+            renderizarItens(); 
+        } 
+    };
 }
 
 function fecharModal() { document.getElementById('item-modal').classList.add('hidden'); }
