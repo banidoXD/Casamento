@@ -47,7 +47,17 @@
                     <i class="fas fa-search absolute left-3 top-3 text-gray-300"></i>
                     <input type="text" id="search-bar" placeholder="Pesquisar item ou tag..." class="w-full pl-10 p-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary">
                 </div>
-                <button id="btn-open-modal" class="bg-casanova-primary hover:bg-opacity-80 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-md whitespace-nowrap"><i class="fas fa-plus mr-2"></i>Novo Item</button>
+                
+                <select id="sort-order" class="p-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary text-sm text-gray-500 bg-white shadow-sm font-semibold">
+                    <option value="padrao">Mais Recentes</option>
+                    <option value="az">Ordem Alfabética (A-Z)</option>
+                    <option value="za">Ordem Alfabética (Z-A)</option>
+                    <option value="prioridade">Maior Prioridade</option>
+                </select>
+
+                <button id="btn-open-modal" class="bg-casanova-primary hover:bg-opacity-80 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-md whitespace-nowrap">
+                    <i class="fas fa-plus mr-2"></i>Novo Item
+                </button>
             </div>
             
             <div class="flex gap-2 overflow-x-auto pb-1" id="category-filters">
