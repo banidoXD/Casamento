@@ -239,7 +239,7 @@ window.iniciarTransferencia = function(id) {
     document.getElementById('input-categoria').value = item.Categoria;
     document.getElementById('checklist-origin-id').value = item.ID; 
 }
-}
+
 
 // === AÇÕES COMPRAS API ===
 async function pagarParcelaRapido(id, btn) {
