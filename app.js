@@ -1,6 +1,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbzfhsiTHUDWLyC2p-1UaxPWqjKvwtDwG2vWbYDSuB-2frZ7gQManei6ENER1pUT1n6bYA/exec"; // <-- NÃO ESQUEÇA DE COLAR SUA URL NOVA
 let estadoItens = [];
-let filtroAtivo = 'Todos';
+let filtroCategoria = 'Todas';
+let filtroStatus = 'Todos';
 
 document.addEventListener('DOMContentLoaded', () => {
     configurarEventosUI();
@@ -29,18 +30,24 @@ function renderizarItens() {
 
     const filtrados = estadoItens.filter(item => {
         const matchBusca = (item.Item || '').toLowerCase().includes(busca) || (item.Tags || '').toLowerCase().includes(busca);
+        const matchCategoria = filtroCategoria === 'Todas' || item.Categoria === filtroCategoria;
         
         // Lógica de Estados Calculados
         const isConcluido = item.Status === 'Ganhamos' || (item.Status === 'Comprado' && parseInt(item.ParcelasPagas) >= parseInt(item.QtdParcelas));
         const isPagando = item.Status === 'Comprado' && parseInt(item.ParcelasPagas) < parseInt(item.QtdParcelas);
         
-        let matchFiltro = true;
-        if (filtroAtivo === 'Pendentes') matchFiltro = item.Status === 'Pendente';
-        if (filtroAtivo === 'Pagando') matchFiltro = isPagando;
-        if (filtroAtivo === 'Concluídos') matchFiltro = isConcluido;
+        let matchStatus = true;
+        if (filtroStatus === 'Pendentes') matchStatus = item.Status === 'Pendente';
+        if (filtroStatus === 'Pagando') matchStatus = isPagando;
+        if (filtroStatus === 'Concluídos') matchStatus = isConcluido;
 
-        return matchBusca && matchFiltro;
+        return matchBusca && matchCategoria && matchStatus;
     });
+
+    if (filtrados.length === 0) {
+        grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">Nenhum item encontrado com estes filtros.</div>`;
+        return;
+    }
 
     filtrados.forEach(item => {
         const pagas = parseInt(item.ParcelasPagas) || 0;
@@ -48,6 +55,14 @@ function renderizarItens() {
         const perc = (pagas / total) * 100;
         const imagem = item.ImagemURL || 'https://via.placeholder.com/400x300?text=Casa+Nova';
         
+        // Renderização de Tags
+        let tagsHtml = '';
+        if (item.Tags) {
+            tagsHtml = `<div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-gray-100">` + 
+                       item.Tags.split(',').map(t => `<span class="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 text-[9px] font-bold uppercase">#${t.trim()}</span>`).join('') +
+                       `</div>`;
+        }
+
         // Badge e Cor de Status
         let statusTag = `<span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Pendente</span>`;
         if (item.Status === 'Ganhamos') statusTag = `<span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Presente</span>`;
@@ -82,9 +97,10 @@ function renderizarItens() {
                         <summary class="list-none text-[10px] font-bold text-casanova-secondary cursor-pointer uppercase tracking-widest flex items-center justify-between">
                             Detalhes <i class="fas fa-chevron-down text-[8px] group-open/det:rotate-180 transition-transform"></i>
                         </summary>
-                        <div class="pt-3 text-xs text-gray-500 space-y-2">
-                            <p>${item.Observacoes || 'Sem notas.'}</p>
+                        <div class="pt-3 text-xs text-gray-500">
+                            <p class="mb-3">${item.Observacoes || 'Sem notas.'}</p>
                             <div id="links-${item.ID}" class="flex flex-wrap gap-1"></div>
+                            ${tagsHtml}
                         </div>
                     </details>
                 </div>
@@ -108,17 +124,17 @@ function renderizarLinksNoCard(item) {
 // === AÇÕES DE API ===
 async function pagarParcelaRapido(id) {
     const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'increment_installment', ID: id }) });
-    const json = await res.json();
-    if(json.status === 'success') carregarItens();
+    if((await res.json()).status === 'success') carregarItens();
 }
 
 async function salvarItem(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
-    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i>';
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Salvando...';
     
     const links = [];
     document.querySelectorAll('.link-row').forEach(row => {
+        // BUG CORRIGIDO AQUI (as classes foram adicionadas na função uiCriarLinhaLink)
         const l = row.querySelector('.link-loja').value;
         const u = row.querySelector('.link-url').value;
         if(l && u) links.push({ loja: l, url: u });
@@ -172,10 +188,10 @@ function atualizarDashboard() {
     });
 
     const pGeral = estadoItens.length ? Math.round((concl / estadoItens.length) * 100) : 0;
-    document.getElementById('total-estimado').innerText = `R$ ${est.toFixed(2)}`;
-    document.getElementById('total-pago').innerText = `R$ ${pago.toFixed(2)}`;
-    document.getElementById('total-divida').innerText = `R$ ${div.toFixed(2)}`;
-    document.getElementById('total-proximo-mes').innerText = `R$ ${prox.toFixed(2)}`;
+    document.getElementById('total-estimado').innerText = `R$ ${est.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('total-pago').innerText = `R$ ${pago.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('total-divida').innerText = `R$ ${div.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+    document.getElementById('total-proximo-mes').innerText = `R$ ${prox.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
     document.getElementById('progress-text').innerText = `${pGeral}% CONCLUÍDO`;
     document.getElementById('progress-bar-geral').style.width = `${pGeral}%`;
 }
@@ -215,8 +231,15 @@ function abrirEdicao(id) {
     document.getElementById('btn-delete-trigger').onclick = () => {
         document.getElementById('confirm-modal').classList.remove('hidden');
         document.getElementById('btn-confirm-delete').onclick = async () => {
+            const btnConfirm = document.getElementById('btn-confirm-delete');
+            btnConfirm.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'delete', ID: item.ID }) });
-            if((await res.json()).status === 'success') { fecharConfirm(); fecharModal(); carregarItens(); }
+            if((await res.json()).status === 'success') { 
+                btnConfirm.innerHTML = 'SIM, EXCLUIR';
+                fecharConfirm(); 
+                fecharModal(); 
+                carregarItens(); 
+            }
         };
     };
 
@@ -226,13 +249,19 @@ function abrirEdicao(id) {
 }
 
 function uiCriarLinhaLink(l, u) {
-    const html = `<div class="flex gap-2 link-row"><input type="text" value="${l}" placeholder="Loja" class="w-1/3 p-2 bg-gray-50 rounded-lg outline-none text-xs"><input type="url" value="${u}" placeholder="URL" class="w-2/3 p-2 bg-gray-50 rounded-lg outline-none text-xs"><button type="button" onclick="this.parentElement.remove()" class="text-red-300 px-1"><i class="fas fa-times"></i></button></div>`;
+    // BUG CORRIGIDO: Adicionadas as classes link-loja e link-url nos inputs
+    const html = `<div class="flex gap-2 link-row">
+                    <input type="text" value="${l}" placeholder="Loja" class="w-1/3 p-2 bg-gray-50 rounded-lg outline-none text-xs link-loja">
+                    <input type="url" value="${u}" placeholder="URL" class="w-2/3 p-2 bg-gray-50 rounded-lg outline-none text-xs link-url">
+                    <button type="button" onclick="this.parentElement.remove()" class="text-red-300 px-1"><i class="fas fa-times"></i></button>
+                  </div>`;
     document.getElementById('links-container').insertAdjacentHTML('beforeend', html);
 }
 
 function configurarEventosUI() {
     document.getElementById('item-form').onsubmit = salvarItem;
     document.getElementById('search-bar').oninput = renderizarItens;
+    
     document.getElementById('btn-open-modal').onclick = () => {
         document.getElementById('item-form').reset();
         document.getElementById('input-id').value = '';
@@ -240,13 +269,26 @@ function configurarEventosUI() {
         uiCriarLinhaLink('', '');
         document.getElementById('btn-delete-trigger').classList.add('hidden');
         uiToggleCampos();
+        document.getElementById('modal-title').innerText = "Adicionar Novo Item";
         document.getElementById('item-modal').classList.remove('hidden');
     };
+
+    // Controle dos Filtros de Categoria
+    document.getElementById('category-filters').onclick = (e) => {
+        if(e.target.tagName === 'BUTTON') {
+            document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-gray-100 text-gray-500");
+            e.target.className = "cat-btn active px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-casanova-primary text-white";
+            filtroCategoria = e.target.innerText;
+            renderizarItens();
+        }
+    };
+
+    // Controle dos Filtros de Status
     document.getElementById('status-filters').onclick = (e) => {
         if(e.target.tagName === 'BUTTON') {
-            document.querySelectorAll('.filter-btn').forEach(b => b.className = "filter-btn px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-gray-100 text-gray-500");
-            e.target.className = "filter-btn active px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-casanova-primary text-white";
-            filtroAtivo = e.target.innerText;
+            document.querySelectorAll('.status-btn').forEach(b => b.className = "status-btn px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-100 text-gray-500");
+            e.target.className = "status-btn active px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-800 text-white";
+            filtroStatus = e.target.innerText;
             renderizarItens();
         }
     };
