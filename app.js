@@ -107,58 +107,138 @@ function renderizarLinksNoCard(item) {
 
 window.filtrarPorTag = function(tag) { document.getElementById('search-bar').value = tag; renderizarItens(); }
 
-// === RENDERIZAÇÃO CHECKLIST (NOVO) ===
+// === RENDERIZAÇÃO CHECKLIST (ORDENADO E COM EDIÇÃO) ===
+let editandoChecklistId = null;
+
 function renderizarChecklist() {
     const grid = document.getElementById('checklist-grid');
     grid.innerHTML = '';
     
-    estadoChecklist.forEach(item => {
+    // Separa os itens em dois grupos
+    const pendentes = estadoChecklist.filter(i => i.StatusDaIdeia === 'Aguardando');
+    const concluidos = estadoChecklist.filter(i => i.StatusDaIdeia !== 'Aguardando');
+
+    // Função interna para desenhar o card
+    const gerarCard = (item) => {
         const isInList = item.StatusDaIdeia === 'Na Lista de Compras';
         const isDiscarded = item.StatusDaIdeia === 'Descartado';
         let opacidade = isInList || isDiscarded ? 'opacity-50 grayscale' : '';
-        let badge = isInList ? `<span class="text-[10px] font-bold bg-green-100 text-green-600 px-2 py-1 rounded"><i class="fas fa-check mr-1"></i>Enviado</span>` 
-                  : isDiscarded ? `<span class="text-[10px] font-bold bg-gray-200 text-gray-500 px-2 py-1 rounded"><i class="fas fa-ban mr-1"></i>Descartado</span>` : '';
+        
+        let badge = isInList ? `<span class="text-[9px] font-bold bg-green-100 text-green-600 px-2 py-1 rounded uppercase tracking-wider"><i class="fas fa-check mr-1"></i>Na Lista</span>` 
+                  : isDiscarded ? `<span class="text-[9px] font-bold bg-gray-200 text-gray-500 px-2 py-1 rounded uppercase tracking-wider"><i class="fas fa-ban mr-1"></i>Descartado</span>` : '';
 
+        // Botões variam se ele está ativo ou finalizado
         const acoes = (!isInList && !isDiscarded) ? `
             <div class="flex gap-2">
-                <button onclick="mudarStatusChecklist(${item.ID}, 'Descartado')" class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 text-xs font-bold transition-colors"><i class="fas fa-times"></i></button>
-                <button onclick="iniciarTransferencia(${item.ID})" class="flex-1 py-1.5 rounded-lg bg-casanova-primary text-white text-xs font-bold shadow-sm hover:bg-pink-400 transition-colors">PESQUISAR COM PRÉ-LISTA</button>
+                <button onclick="mudarStatusChecklist(${item.ID}, 'Descartado')" class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 text-xs font-bold transition-colors shadow-sm"><i class="fas fa-times"></i></button>
+                <button onclick="iniciarTransferencia(${item.ID})" class="flex-1 py-1.5 rounded-lg bg-casanova-primary text-white text-xs font-bold shadow-sm hover:bg-pink-400 transition-colors tracking-wide">ENVIAR PARA COMPRAS</button>
             </div>
-        ` : '';
+        ` : `
+            <div class="flex justify-center">
+                <button onclick="mudarStatusChecklist(${item.ID}, 'Aguardando')" class="text-[10px] font-bold text-gray-400 hover:text-casanova-primary underline"><i class="fas fa-undo mr-1"></i>Desfazer</button>
+            </div>
+        `;
 
-        const card = `
-            <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between h-32 ${opacidade}">
-                <div><div class="flex justify-between items-start"><h3 class="font-bold text-gray-800 text-sm">${item.Item}</h3>${badge}</div><p class="text-[10px] text-gray-400 uppercase font-bold mt-1">${item.Categoria}</p></div>
-                <div class="mt-auto pt-3 border-t border-gray-50">${acoes}</div>
+        const btnEditar = (!isInList && !isDiscarded) ? `<button onclick="editarChecklist(${item.ID})" class="text-gray-300 hover:text-casanova-primary transition-colors absolute top-4 right-4"><i class="fas fa-pen text-sm"></i></button>` : '';
+
+        return `
+            <div class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex flex-col justify-between min-h-[120px] relative transition-all ${opacidade}">
+                ${btnEditar}
+                <div class="pr-8">
+                    <h3 class="font-bold text-gray-800 text-sm leading-tight mb-1">${item.Item}</h3>
+                    <div class="flex items-center gap-2 mt-2">
+                        <p class="text-[9px] bg-gray-50 border border-gray-100 px-1.5 py-0.5 rounded text-gray-400 uppercase font-bold tracking-widest">${item.Categoria}</p>
+                        ${badge}
+                    </div>
+                </div>
+                <div class="mt-4 pt-3 border-t border-gray-50">${acoes}</div>
             </div>`;
-        grid.insertAdjacentHTML('beforeend', card);
-    });
+    };
+
+    // Renderiza os pendentes primeiro
+    pendentes.forEach(item => grid.insertAdjacentHTML('beforeend', gerarCard(item)));
+
+    // Se houver finalizados, insere a quebra de linha estilizada
+    if (pendentes.length > 0 && concluidos.length > 0) {
+        grid.insertAdjacentHTML('beforeend', `
+            <div class="col-span-full border-t-2 border-dashed border-gray-300 my-6 relative">
+                <span class="absolute -top-2.5 left-1/2 transform -translate-x-1/2 bg-casanova-bg px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Decididos & Descartados</span>
+            </div>
+        `);
+    }
+
+    // Renderiza os concluídos no final
+    concluidos.forEach(item => grid.insertAdjacentHTML('beforeend', gerarCard(item)));
 }
 
-// === LÓGICA DE TRANSFERÊNCIA E CHECKLIST ===
+// === LÓGICA DE TRANSFERÊNCIA E EDIÇÃO CHECKLIST ===
+window.editarChecklist = function(id) {
+    const item = estadoChecklist.find(i => i.ID == id);
+    document.getElementById('novo-item-check-nome').value = item.Item;
+    document.getElementById('novo-item-check-cat').value = item.Categoria;
+    editandoChecklistId = id;
+    
+    // Altera o visual do botão de cima
+    const btn = document.getElementById('btn-add-checklist');
+    btn.innerHTML = '<i class="fas fa-save mr-2"></i>SALVAR';
+    btn.classList.remove('bg-gray-800', 'hover:bg-gray-900');
+    btn.classList.add('bg-casanova-primary', 'hover:bg-pink-400');
+    
+    // Rola a tela para o input suavemente
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
 window.adicionarAoChecklist = async function() {
-    const nome = document.getElementById('novo-item-check-nome').value;
+    const nome = document.getElementById('novo-item-check-nome').value.trim();
     const cat = document.getElementById('novo-item-check-cat').value;
     if(!nome) return;
-    document.getElementById('novo-item-check-nome').value = '';
     
-    await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'add', sheetName: 'ChecklistBase', ID: Date.now(), Item: nome, Categoria: cat, StatusDaIdeia: 'Aguardando' }) });
-    carregarItens();
+    const btn = document.getElementById('btn-add-checklist');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    try {
+        if (editandoChecklistId) {
+            // Editando
+            const item = estadoChecklist.find(i => i.ID == editandoChecklistId);
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'edit', sheetName: 'ChecklistBase', ID: item.ID, Item: nome, Categoria: cat, StatusDaIdeia: item.StatusDaIdeia }) });
+            
+            // Restaura o botão original
+            editandoChecklistId = null;
+            btn.innerText = 'ADICIONAR';
+            btn.classList.add('bg-gray-800', 'hover:bg-gray-900');
+            btn.classList.remove('bg-casanova-primary', 'hover:bg-pink-400');
+        } else {
+            // Criando novo
+            await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'add', sheetName: 'ChecklistBase', ID: Date.now(), Item: nome, Categoria: cat, StatusDaIdeia: 'Aguardando' }) });
+        }
+        
+        document.getElementById('novo-item-check-nome').value = '';
+        carregarItens();
+    } catch (e) {
+        alert("Erro ao salvar no checklist.");
+    } finally {
+        btn.disabled = false;
+        if (!editandoChecklistId) btn.innerText = 'ADICIONAR';
+    }
 }
 
 window.mudarStatusChecklist = async function(id, novoStatus) {
     const item = estadoChecklist.find(i => i.ID == id);
     item.StatusDaIdeia = novoStatus;
+    renderizarChecklist(); // Renderização Otimista (move pra baixo na hora, sem esperar o servidor)
+    
     await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'edit', sheetName: 'ChecklistBase', ID: item.ID, Item: item.Item, Categoria: item.Categoria, StatusDaIdeia: novoStatus }) });
     carregarItens();
 }
 
 window.iniciarTransferencia = function(id) {
     const item = estadoChecklist.find(i => i.ID == id);
-    document.getElementById('btn-open-modal').click(); // Limpa e abre o modal
+    document.getElementById('btn-open-modal').click(); 
     document.getElementById('input-nome').value = item.Item;
     document.getElementById('input-categoria').value = item.Categoria;
-    document.getElementById('checklist-origin-id').value = item.ID; // Grava a origem para mudar o status depois
+    document.getElementById('checklist-origin-id').value = item.ID; 
+}
 }
 
 // === AÇÕES COMPRAS API ===
