@@ -13,40 +13,30 @@
 </head>
 <body class="bg-casanova-bg text-gray-700 font-sans p-4 md:p-8">
 
-<header class="max-w-6xl mx-auto mb-8 text-center">
-        <h1 class="text-4xl md:text-5xl font-bold text-casanova-primary mb-2 tracking-wide" style="font-family: serif;">
+    <div class="max-w-6xl mx-auto mb-6 flex justify-center">
+        <div class="bg-white p-1 rounded-2xl shadow-sm border border-gray-100 flex gap-2 w-full md:w-auto">
+            <button onclick="mudarAba('compras')" id="aba-compras" class="flex-1 md:w-64 py-3 rounded-xl font-bold text-sm transition-all bg-casanova-primary text-white shadow-md">
+                <i class="fas fa-shopping-cart mr-2"></i>Lista de Compras
+            </button>
+            <button onclick="mudarAba('checklist')" id="aba-checklist" class="flex-1 md:w-64 py-3 rounded-xl font-bold text-sm transition-all text-gray-500 hover:bg-gray-50">
+                <i class="fas fa-list-check mr-2"></i>Checklist de Ideias
+            </button>
+        </div>
+    </div>
 
-            <i class="fas fa-home mr-2"></i>Nossa Casa
-
-        </h1>
+    <header class="max-w-6xl mx-auto mb-8 text-center relative" id="header-compras">
+        <h1 class="text-4xl font-bold text-casanova-primary mb-6" style="font-family: serif;">Casa Nova</h1>
         
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-                <p class="text-[10px] uppercase font-bold text-gray-400">Total Estimado</p>
-                <p class="text-lg font-bold" id="total-estimado">R$ 0,00</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-green-100">
-                <p class="text-[10px] uppercase font-bold text-green-400">Já Pago</p>
-                <p class="text-lg font-bold text-green-600" id="total-pago">R$ 0,00</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl shadow-sm border border-red-100">
-                <p class="text-[10px] uppercase font-bold text-red-400">A Pagar (Total)</p>
-                <p class="text-lg font-bold text-red-500" id="total-divida">R$ 0,00</p>
-            </div>
-            <div class="bg-casanova-secondary bg-opacity-10 p-4 rounded-xl shadow-sm border border-casanova-secondary">
-                <p class="text-[10px] uppercase font-bold text-casanova-secondary">Parcelas Próx. Mês</p>
-                <p class="text-lg font-bold text-gray-700" id="total-proximo-mes">R$ 0,00</p>
-            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100"><p class="text-[10px] uppercase font-bold text-gray-400">Total Estimado</p><p class="text-lg font-bold" id="total-estimado">R$ 0,00</p></div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-green-100"><p class="text-[10px] uppercase font-bold text-green-400">Já Pago</p><p class="text-lg font-bold text-green-600" id="total-pago">R$ 0,00</p></div>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-red-100"><p class="text-[10px] uppercase font-bold text-red-400">A Pagar (Total)</p><p class="text-lg font-bold text-red-500" id="total-divida">R$ 0,00</p></div>
+            <div class="bg-casanova-secondary bg-opacity-10 p-4 rounded-xl shadow-sm border border-casanova-secondary"><p class="text-[10px] uppercase font-bold text-casanova-secondary">Parcelas Próx. Mês</p><p class="text-lg font-bold text-gray-700" id="total-proximo-mes">R$ 0,00</p></div>
         </div>
 
         <div class="max-w-xl mx-auto mb-8">
-            <div class="flex justify-between text-[11px] font-bold mb-1 px-1">
-                <span class="text-casanova-primary">Progresso do Enxoval</span>
-                <span id="progress-text">0%</span>
-            </div>
-            <div class="w-full bg-gray-200 rounded-full h-2.5">
-                <div id="progress-bar-geral" class="bg-casanova-primary h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div>
-            </div>
+            <div class="flex justify-between text-[11px] font-bold mb-1 px-1"><span class="text-casanova-primary">Progresso do Enxoval</span><span id="progress-text">0%</span></div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5"><div id="progress-bar-geral" class="bg-casanova-primary h-2.5 rounded-full transition-all duration-700" style="width: 0%"></div></div>
         </div>
 
         <div class="bg-white p-4 rounded-2xl shadow-sm space-y-4 border border-gray-50">
@@ -55,9 +45,7 @@
                     <i class="fas fa-search absolute left-3 top-3 text-gray-300"></i>
                     <input type="text" id="search-bar" placeholder="Pesquisar item ou tag..." class="w-full pl-10 p-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary">
                 </div>
-                <button id="btn-open-modal" class="bg-casanova-primary hover:bg-opacity-80 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-md">
-                    <i class="fas fa-plus mr-2"></i>Novo Item
-                </button>
+                <button id="btn-open-modal" class="bg-casanova-primary hover:bg-opacity-80 text-white px-6 py-2 rounded-xl font-bold transition-all shadow-md whitespace-nowrap"><i class="fas fa-plus mr-2"></i>Novo Item</button>
             </div>
             
             <div class="flex gap-2 overflow-x-auto pb-1" id="category-filters">
@@ -78,8 +66,21 @@
         </div>
     </header>
 
-    <main class="max-w-6xl mx-auto">
-        <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-20"></div>
+    <main class="max-w-6xl mx-auto mb-20" id="view-compras">
+        <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </main>
+
+    <main class="max-w-6xl mx-auto mb-20 hidden" id="view-checklist">
+        <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6 text-center">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Checklist de Ideias</h2>
+            <p class="text-gray-500 text-sm mb-4">Itens clássicos que talvez a casa precise. Adicione à lista de compras ou descarte.</p>
+            <div class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
+                <input type="text" id="novo-item-check-nome" placeholder="Nome do novo item..." class="flex-1 p-3 border border-gray-200 rounded-xl outline-none">
+                <select id="novo-item-check-cat" class="p-3 border border-gray-200 rounded-xl outline-none"><option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Lavanderia</option><option>Outros</option></select>
+                <button onclick="adicionarAoChecklist()" class="bg-gray-800 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-900 transition-colors">ADICIONAR</button>
+            </div>
+        </div>
+        <div id="checklist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </main>
 
     <div id="item-modal" class="fixed inset-0 bg-black bg-opacity-60 z-40 flex items-center justify-center hidden p-4">
@@ -87,25 +88,19 @@
             <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center"><i class="fas fa-edit mr-3 text-casanova-primary"></i> <span id="modal-title">Novo Item</span></h2>
             <form id="item-form" class="space-y-4">
                 <input type="hidden" id="input-id">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="text-xs font-bold text-gray-400 ml-1">NOME DO ITEM</label><input type="text" id="input-nome" required class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary"></div>
+                <input type="hidden" id="checklist-origin-id"> <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div><label class="text-xs font-bold text-gray-400 ml-1">NOME DO ITEM</label><input type="text" id="input-nome" required class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
                     <div><label class="text-xs font-bold text-gray-400 ml-1">CATEGORIA</label>
-                        <select id="input-categoria" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none">
-                            <option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Lavanderia</option><option>Escritório</option><option>Outros</option>
-                        </select>
+                        <select id="input-categoria" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"><option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Lavanderia</option><option>Escritório</option><option>Outros</option></select>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div><label class="text-xs font-bold text-gray-400 ml-1">STATUS</label>
-                        <select id="input-status" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none" onchange="uiToggleCampos()">
-                            <option value="Pendente">Pendente</option><option value="Comprado">Comprado</option><option value="Ganhamos">Ganhamos</option>
-                        </select>
+                        <select id="input-status" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none" onchange="uiToggleCampos()"><option value="Pendente">Pendente</option><option value="Comprado">Comprado</option><option value="Ganhamos">Ganhamos</option></select>
                     </div>
                     <div><label class="text-xs font-bold text-gray-400 ml-1">VALOR ESTIMADO</label><input type="number" step="0.01" id="input-valor-estimado" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
                     <div><label class="text-xs font-bold text-gray-400 ml-1">PRIORIDADE</label>
-                        <select id="input-prioridade" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none">
-                            <option value="1-Essencial">1 - Essencial</option><option value="2-Funcional">2 - Funcional</option><option value="3-Estética">3 - Estética</option>
-                        </select>
+                        <select id="input-prioridade" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"><option value="1-Essencial">1 - Essencial</option><option value="2-Funcional">2 - Funcional</option><option value="3-Estética">3 - Estética</option></select>
                     </div>
                 </div>
 
@@ -113,9 +108,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div><label class="text-xs font-bold text-gray-400 ml-1">VALOR FINAL PAGO</label><input type="number" step="0.01" id="input-valor-final" class="w-full p-3 bg-white border-none rounded-xl outline-none"></div>
                         <div><label class="text-xs font-bold text-gray-400 ml-1">FORMA DE PAGAMENTO</label>
-                            <select id="input-forma-pag" class="w-full p-3 bg-white border-none rounded-xl outline-none" onchange="uiToggleCampos()">
-                                <option>À vista</option><option>Parcelado</option>
-                            </select>
+                            <select id="input-forma-pag" class="w-full p-3 bg-white border-none rounded-xl outline-none" onchange="uiToggleCampos()"><option>À vista</option><option>Parcelado</option></select>
                         </div>
                     </div>
                     <div id="parcelas-row" class="hidden grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -126,15 +119,13 @@
                 </div>
 
                 <div id="gift-section" class="hidden bg-purple-50 p-4 rounded-2xl border border-purple-100">
-                    <label class="text-xs font-bold text-purple-400 ml-1">QUEM DEU O PRESENTE?</label>
-                    <input type="text" id="input-quem-deu" class="w-full p-3 bg-white border-none rounded-xl outline-none placeholder-purple-200" placeholder="Nome da pessoa ou família">
+                    <label class="text-xs font-bold text-purple-400 ml-1">QUEM DEU O PRESENTE?</label><input type="text" id="input-quem-deu" class="w-full p-3 bg-white border-none rounded-xl outline-none placeholder-purple-200">
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div><label class="text-xs font-bold text-gray-400 ml-1">URL DA IMAGEM</label><input type="url" id="input-imagem" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
                     <div><label class="text-xs font-bold text-gray-400 ml-1">TAGS (SEPARAR POR VÍRGULA)</label><input type="text" id="input-tags" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
                 </div>
-
                 <div><label class="text-xs font-bold text-gray-400 ml-1">OBSERVAÇÕES</label><textarea id="input-obs" rows="2" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none resize-none"></textarea></div>
 
                 <div id="links-container" class="space-y-2 pt-2"></div>
@@ -148,20 +139,6 @@
                     </div>
                 </div>
             </form>
-        </div>
-    </div>
-
-    <div id="confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden p-4">
-        <div class="bg-white rounded-3xl p-8 max-w-sm w-full text-center shadow-2xl border-t-8 border-red-500">
-            <div class="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-exclamation-triangle text-3xl text-red-500"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">Tem certeza?</h3>
-            <p class="text-gray-500 mb-8 leading-relaxed">Você está prestes a excluir este item do enxoval. Esta ação não pode ser desfeita.</p>
-            <div class="flex gap-4">
-                <button onclick="fecharConfirm()" class="flex-1 py-3 text-gray-400 font-bold hover:bg-gray-100 rounded-xl transition-colors">VOLTAR</button>
-                <button id="btn-confirm-delete" class="flex-1 py-3 bg-red-500 text-white font-bold rounded-xl shadow-lg hover:bg-red-600 transition-all">SIM, EXCLUIR</button>
-            </div>
         </div>
     </div>
 
