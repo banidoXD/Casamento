@@ -70,14 +70,16 @@
         <div id="items-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </main>
 
-    <main class="max-w-6xl mx-auto mb-20 hidden" id="view-checklist">
+<main class="max-w-6xl mx-auto mb-20 hidden" id="view-checklist">
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6 text-center">
             <h2 class="text-2xl font-bold text-gray-800 mb-2">Checklist de Ideias</h2>
             <p class="text-gray-500 text-sm mb-4">Itens clássicos que talvez a casa precise. Adicione à lista de compras ou descarte.</p>
             <div class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
-                <input type="text" id="novo-item-check-nome" placeholder="Nome do novo item..." class="flex-1 p-3 border border-gray-200 rounded-xl outline-none">
-                <select id="novo-item-check-cat" class="p-3 border border-gray-200 rounded-xl outline-none"><option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Lavanderia</option><option>Outros</option></select>
-                <button onclick="adicionarAoChecklist()" class="bg-gray-800 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-900 transition-colors">ADICIONAR</button>
+                <input type="text" id="novo-item-check-nome" placeholder="Nome do novo item..." class="flex-1 p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary">
+                <select id="novo-item-check-cat" class="p-3 border border-gray-200 rounded-xl outline-none">
+                    <option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Lavanderia</option><option>Escritório</option><option>Outros</option>
+                </select>
+                <button id="btn-add-checklist" onclick="adicionarAoChecklist()" class="bg-gray-800 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-900 transition-colors shadow-md">ADICIONAR</button>
             </div>
         </div>
         <div id="checklist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
