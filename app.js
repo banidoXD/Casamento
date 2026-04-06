@@ -13,46 +13,32 @@ async function carregarItens() {
     grid.innerHTML = `<div class="col-span-full text-center py-20 text-gray-400"><i class="fas fa-circle-notch fa-spin text-3xl mb-4"></i><p class="font-bold tracking-widest uppercase text-xs">Sincronizando com a planilha...</p></div>`;
 
     try {
-        // Adicionando um timestamp para evitar cache e garantindo o redirect
         const urlComCacheBuster = API_URL + (API_URL.includes('?') ? '&' : '?') + 't=' + Date.now();
-        
-        console.log("Solicitando dados de:", urlComCacheBuster);
-
-        const response = await fetch(urlComCacheBuster, {
-            method: 'GET',
-            mode: 'cors', // Garante que o navegador trate como requisição cross-origin
-            redirect: 'follow' // Instrução explícita para seguir o redirecionamento do Google
-        });
-
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-        }
-
-        const data = await response.json();
-        console.log("Dados recebidos com sucesso:", data);
-        
-        estadoItens = data;
+        const response = await fetch(urlComCacheBuster, { method: 'GET', mode: 'cors', redirect: 'follow' });
+        estadoItens = await response.json();
         renderizarItens();
         atualizarDashboard();
     } catch (e) {
-        console.error("Erro detalhado na captura dos dados:", e);
-        grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10 font-bold">Erro de conexão. Verifique o Console (F12) para detalhes técnicos.</div>`;
+        grid.innerHTML = `<div class="col-span-full text-center text-red-400 py-10 font-bold">Erro de conexão. Verifique o link da API.</div>`;
     }
 }
 
 // === LÓGICA DE FILTROS E RENDERIZAÇÃO ===
 function renderizarItens() {
     const grid = document.getElementById('items-grid');
-    const busca = document.getElementById('search-bar').value.toLowerCase();
+    const busca = document.getElementById('search-bar').value.toLowerCase().trim();
     grid.innerHTML = '';
 
     const filtrados = estadoItens.filter(item => {
         const matchBusca = (item.Item || '').toLowerCase().includes(busca) || (item.Tags || '').toLowerCase().includes(busca);
         const matchCategoria = filtroCategoria === 'Todas' || item.Categoria === filtroCategoria;
         
-        // Lógica de Estados Calculados
-        const isConcluido = item.Status === 'Ganhamos' || (item.Status === 'Comprado' && parseInt(item.ParcelasPagas) >= parseInt(item.QtdParcelas));
-        const isPagando = item.Status === 'Comprado' && parseInt(item.ParcelasPagas) < parseInt(item.QtdParcelas);
+        // Correção pesada na Lógica de Estados (Lidando com valores vazios e "À vista")
+        const pagas = parseInt(item.ParcelasPagas) || 0;
+        const total = parseInt(item.QtdParcelas) || 1;
+        
+        const isConcluido = item.Status === 'Ganhamos' || (item.Status === 'Comprado' && item.FormaPagamento === 'À vista') || (item.Status === 'Comprado' && item.FormaPagamento === 'Parcelado' && pagas >= total);
+        const isPagando = item.Status === 'Comprado' && item.FormaPagamento === 'Parcelado' && pagas < total;
         
         let matchStatus = true;
         if (filtroStatus === 'Pendentes') matchStatus = item.Status === 'Pendente';
@@ -73,19 +59,18 @@ function renderizarItens() {
         const perc = (pagas / total) * 100;
         const imagem = item.ImagemURL || 'https://via.placeholder.com/400x300?text=Casa+Nova';
         
-        // Renderização de Tags
+        // Tags Clicáveis
         let tagsHtml = '';
         if (item.Tags) {
             tagsHtml = `<div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-gray-100">` + 
-                       item.Tags.split(',').map(t => `<span class="bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 text-[9px] font-bold uppercase">#${t.trim()}</span>`).join('') +
+                       item.Tags.split(',').map(t => `<span onclick="filtrarPorTag('${t.trim()}')" class="cursor-pointer bg-gray-100 hover:bg-casanova-primary hover:text-white text-gray-500 px-1.5 py-0.5 rounded border border-gray-200 text-[9px] font-bold uppercase transition-colors shadow-sm">#${t.trim()}</span>`).join('') +
                        `</div>`;
         }
 
-        // Badge e Cor de Status
         let statusTag = `<span class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Pendente</span>`;
         if (item.Status === 'Ganhamos') statusTag = `<span class="bg-purple-100 text-purple-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Presente</span>`;
         else if (item.Status === 'Comprado') {
-            statusTag = pagas >= total 
+            statusTag = (item.FormaPagamento === 'À vista' || pagas >= total)
                 ? `<span class="bg-green-100 text-green-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Pago</span>`
                 : `<span class="bg-blue-100 text-blue-600 px-2 py-1 rounded-md text-[10px] font-bold uppercase">Pagando</span>`;
         }
@@ -101,11 +86,11 @@ function renderizarItens() {
                     <h3 class="font-bold text-gray-800 mb-1 leading-tight">${item.Item}</h3>
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-3">${item.Categoria} • PRIORIDADE ${item.Prioridade.charAt(0)}</p>
                     
-                    ${item.Status === 'Comprado' && pagas < total ? `
+                    ${item.Status === 'Comprado' && item.FormaPagamento === 'Parcelado' && pagas < total ? `
                         <div class="mt-auto">
                             <div class="flex justify-between items-end mb-1">
                                 <span class="text-[10px] font-bold text-gray-400 italic">Parcela ${pagas}/${total}</span>
-                                <button onclick="pagarParcelaRapido(${item.ID})" class="text-xs font-bold text-blue-500 hover:scale-110 transition-transform">+ PAGAR 1</button>
+                                <button onclick="pagarParcelaRapido(${item.ID}, this)" class="text-xs font-bold text-blue-500 hover:scale-110 transition-transform px-2 py-1 bg-blue-50 rounded-lg">+ PAGAR 1</button>
                             </div>
                             <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden"><div class="bg-blue-400 h-full transition-all duration-500" style="width: ${perc}%"></div></div>
                         </div>
@@ -129,6 +114,14 @@ function renderizarItens() {
     });
 }
 
+// Função global para clicar na Tag e filtrar
+window.filtrarPorTag = function(tag) {
+    const searchBar = document.getElementById('search-bar');
+    searchBar.value = tag;
+    renderizarItens(); // Roda o filtro imediatamente
+    searchBar.scrollIntoView({ behavior: 'smooth', block: 'end' }); // Rola a página para cima
+}
+
 function renderizarLinksNoCard(item) {
     const container = document.getElementById(`links-${item.ID}`);
     try {
@@ -140,19 +133,38 @@ function renderizarLinksNoCard(item) {
 }
 
 // === AÇÕES DE API ===
-async function pagarParcelaRapido(id) {
-    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'increment_installment', ID: id }) });
-    if((await res.json()).status === 'success') carregarItens();
+
+// Recebe o ID do item e o próprio Botão (btnElement)
+async function pagarParcelaRapido(id, btnElement) {
+    const txtOriginal = btnElement.innerHTML;
+    // Trava o botão e põe o loading
+    btnElement.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i>';
+    btnElement.disabled = true;
+    btnElement.classList.add('opacity-50', 'cursor-not-allowed');
+
+    try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify({ action: 'increment_installment', ID: id }) });
+        if((await res.json()).status === 'success') {
+            carregarItens(); // Recarrega tudo e refaz o botão do zero
+        }
+    } catch (e) {
+        alert("Erro de conexão ao pagar parcela.");
+        // Destrava o botão caso falhe
+        btnElement.innerHTML = txtOriginal;
+        btnElement.disabled = false;
+        btnElement.classList.remove('opacity-50', 'cursor-not-allowed');
+    }
 }
 
 async function salvarItem(e) {
     e.preventDefault();
     const btn = e.target.querySelector('button[type="submit"]');
-    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> Salvando...';
+    // Trava botão de Salvar
+    btn.innerHTML = '<i class="fas fa-sync fa-spin"></i> SALVANDO...';
+    btn.disabled = true;
     
     const links = [];
     document.querySelectorAll('.link-row').forEach(row => {
-        // BUG CORRIGIDO AQUI (as classes foram adicionadas na função uiCriarLinhaLink)
         const l = row.querySelector('.link-loja').value;
         const u = row.querySelector('.link-url').value;
         if(l && u) links.push({ loja: l, url: u });
@@ -178,8 +190,19 @@ async function salvarItem(e) {
         Links: links
     };
 
-    const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-    if((await res.json()).status === 'success') { fecharModal(); carregarItens(); }
+    try {
+        const res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        if((await res.json()).status === 'success') { 
+            fecharModal(); 
+            carregarItens(); 
+        }
+    } catch(e) {
+        alert("Erro de conexão ao salvar.");
+    } finally {
+        // ESSA É A MÁGICA: Independente de dar erro ou sucesso, destrava o botão pro futuro
+        btn.innerHTML = 'SALVAR ITEM';
+        btn.disabled = false;
+    }
 }
 
 // === UI E DASHBOARD ===
@@ -194,13 +217,19 @@ function atualizarDashboard() {
 
         if (i.Status === 'Pendente') est += vEst;
         if (i.Status === 'Ganhamos') concl++;
+        
         if (i.Status === 'Comprado') {
-            pago += (vPar * pPag);
-            div += (vPar * (qPar - pPag));
-            if (pPag < qPar) {
-                prox += vPar;
-            } else {
+            if (i.FormaPagamento === 'À vista') {
+                pago += vFin;
                 concl++;
+            } else { // Parcelado
+                pago += (vPar * pPag);
+                div += (vPar * (qPar - pPag));
+                if (pPag < qPar) {
+                    prox += vPar;
+                } else {
+                    concl++;
+                }
             }
         }
     });
@@ -222,9 +251,15 @@ function uiToggleCampos() {
     document.getElementById('gift-section').classList.toggle('hidden', s !== 'Ganhamos');
 }
 
-function abrirEdicao(id) {
+window.abrirEdicao = function(id) {
     const item = estadoItens.find(i => i.ID == id);
     if(!item) return;
+    
+    // Reseta o botão de Salvar por garantia (caso o usuário tenha fechado na marra no meio de um save antes)
+    const btnSalvar = document.querySelector('#item-form button[type="submit"]');
+    btnSalvar.innerHTML = 'SALVAR ITEM';
+    btnSalvar.disabled = false;
+
     document.getElementById('item-form').reset();
     document.getElementById('input-id').value = item.ID;
     document.getElementById('input-nome').value = item.Item;
@@ -267,7 +302,6 @@ function abrirEdicao(id) {
 }
 
 function uiCriarLinhaLink(l, u) {
-    // BUG CORRIGIDO: Adicionadas as classes link-loja e link-url nos inputs
     const html = `<div class="flex gap-2 link-row">
                     <input type="text" value="${l}" placeholder="Loja" class="w-1/3 p-2 bg-gray-50 rounded-lg outline-none text-xs link-loja">
                     <input type="url" value="${u}" placeholder="URL" class="w-2/3 p-2 bg-gray-50 rounded-lg outline-none text-xs link-url">
@@ -281,6 +315,10 @@ function configurarEventosUI() {
     document.getElementById('search-bar').oninput = renderizarItens;
     
     document.getElementById('btn-open-modal').onclick = () => {
+        const btnSalvar = document.querySelector('#item-form button[type="submit"]');
+        btnSalvar.innerHTML = 'SALVAR ITEM';
+        btnSalvar.disabled = false;
+
         document.getElementById('item-form').reset();
         document.getElementById('input-id').value = '';
         document.getElementById('links-container').innerHTML = '';
@@ -296,7 +334,7 @@ function configurarEventosUI() {
         if(e.target.tagName === 'BUTTON') {
             document.querySelectorAll('.cat-btn').forEach(b => b.className = "cat-btn px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-gray-100 text-gray-500");
             e.target.className = "cat-btn active px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap bg-casanova-primary text-white";
-            filtroCategoria = e.target.innerText;
+            filtroCategoria = e.target.innerText.trim();
             renderizarItens();
         }
     };
@@ -306,7 +344,7 @@ function configurarEventosUI() {
         if(e.target.tagName === 'BUTTON') {
             document.querySelectorAll('.status-btn').forEach(b => b.className = "status-btn px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-100 text-gray-500");
             e.target.className = "status-btn active px-4 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider whitespace-nowrap bg-gray-800 text-white";
-            filtroStatus = e.target.innerText;
+            filtroStatus = e.target.innerText.trim();
             renderizarItens();
         }
     };
