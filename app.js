@@ -344,6 +344,11 @@ function configurarEventosUI() {
     document.getElementById('sort-order').onchange = renderizarItens;
     
     document.getElementById('btn-open-modal').onclick = () => { const btnSalvar = document.querySelector('#item-form button[type="submit"]'); btnSalvar.innerHTML = 'SALVAR ITEM'; btnSalvar.disabled = false; document.getElementById('item-form').reset(); document.getElementById('input-id').value = ''; document.getElementById('checklist-origin-id').value = ''; document.getElementById('links-container').innerHTML = ''; uiCriarLinhaLink('', ''); document.getElementById('btn-delete-trigger').classList.add('hidden'); uiToggleCampos(); document.getElementById('modal-title').innerText = "Adicionar Novo Item"; document.getElementById('item-modal').classList.remove('hidden'); };
+
+    // (Novo) Controle de Filtros e Busca do Checklist
+    document.getElementById('search-check').oninput = renderizarChecklist;
+    document.getElementById('sort-check').onchange = renderizarChecklist;
+    document.getElementById('filter-cat-check').onchange = renderizarChecklist;
     
     // Filtro de Categoria (CORRIGIDO textContent)
     document.getElementById('category-filters').onclick = (e) => { 
