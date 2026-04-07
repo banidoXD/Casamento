@@ -86,14 +86,40 @@
         <div class="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 mb-6 text-center">
             <h2 class="text-2xl font-bold text-gray-800 mb-2">Checklist de Ideias</h2>
             <p class="text-gray-500 text-sm mb-4">Itens clássicos que talvez a casa precise. Adicione à lista de compras ou descarte.</p>
-            <div class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto">
+            
+            <div class="flex flex-col md:flex-row gap-4 max-w-lg mx-auto mb-6">
                 <input type="text" id="novo-item-check-nome" placeholder="Nome do novo item..." class="flex-1 p-3 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary">
                 <select id="novo-item-check-cat" class="p-3 border border-gray-200 rounded-xl outline-none">
                     <option>Cozinha</option><option>Sala</option><option>Quarto</option><option>Banheiro</option><option>Lavanderia</option><option>Escritório</option><option>Outros</option>
                 </select>
                 <button id="btn-add-checklist" onclick="adicionarAoChecklist()" class="bg-gray-800 text-white font-bold px-6 py-3 rounded-xl hover:bg-gray-900 transition-colors shadow-md">ADICIONAR</button>
             </div>
+
+            <div class="flex flex-col md:flex-row gap-4 max-w-2xl mx-auto pt-6 border-t border-gray-100">
+                <div class="relative flex-1">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-300"></i>
+                    <input type="text" id="search-check" placeholder="Pesquisar nas ideias..." class="w-full pl-10 p-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary text-sm">
+                </div>
+                
+                <select id="sort-check" class="p-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary text-sm text-gray-500 font-semibold bg-gray-50">
+                    <option value="padrao">Ordem de Adição</option>
+                    <option value="az">Alfabética (A-Z)</option>
+                    <option value="za">Alfabética (Z-A)</option>
+                </select>
+
+                <select id="filter-cat-check" class="p-2 border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-casanova-primary text-sm text-gray-500 font-semibold bg-gray-50">
+                    <option value="Todas">Todas Categorias</option>
+                    <option value="Cozinha">Cozinha</option>
+                    <option value="Sala">Sala</option>
+                    <option value="Quarto">Quarto</option>
+                    <option value="Banheiro">Banheiro</option>
+                    <option value="Lavanderia">Lavanderia</option>
+                    <option value="Escritório">Escritório</option>
+                    <option value="Outros">Outros</option>
+                </select>
+            </div>
         </div>
+        
         <div id="checklist-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
     </main>
 
