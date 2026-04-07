@@ -89,7 +89,7 @@ function renderizarItens() {
         const perc = (pagas / total) * 100;
         
         // NOVO PLACEHOLDER (Cor Rosa do Tema)
-        const imagem = item.ImagemURL || 'https://placehold.co/400x300/D1A3B4/FFFFFF?text=Casa+Nova';
+        const imagem = item.ImagemURL || 'https://placehold.co/400x300/D1A3B4/FFFFFF?text=Nossa + Casa';
         
         let tagsHtml = item.Tags ? `<div class="flex flex-wrap gap-1 mt-3 pt-2 border-t border-gray-100">` + item.Tags.split(',').map(t => `<span onclick="filtrarPorTag('${t.trim()}')" class="cursor-pointer bg-gray-100 hover:bg-casanova-primary hover:text-white text-gray-500 px-1.5 py-0.5 rounded border text-[9px] font-bold uppercase transition-colors">#${t.trim()}</span>`).join('') + `</div>` : '';
 
