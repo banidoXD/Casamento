@@ -43,7 +43,7 @@ async function carregarItens() {
         
         renderizarItens();
         atualizarDashboard();
-        ();
+        renderizarChecklist();
     } catch (e) {
         gridC.innerHTML = `<div class="col-span-full text-center text-red-400 py-10 font-bold">Erro de conexão.</div>`;
     }
