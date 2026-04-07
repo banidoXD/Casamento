@@ -43,7 +43,7 @@ async function carregarItens() {
         
         renderizarItens();
         atualizarDashboard();
-        renderizarChecklist();
+        ();
     } catch (e) {
         gridC.innerHTML = `<div class="col-span-full text-center text-red-400 py-10 font-bold">Erro de conexão.</div>`;
     }
@@ -123,11 +123,29 @@ let editandoChecklistId = null;
 
 function renderizarChecklist() {
     const grid = document.getElementById('checklist-grid');
+    const busca = document.getElementById('search-check').value.toLowerCase().trim();
+    const sortOrder = document.getElementById('sort-check').value;
+    const filtroCat = document.getElementById('filter-cat-check').value;
+    
     grid.innerHTML = '';
     
-    // Separa os itens em dois grupos
-    const pendentes = estadoChecklist.filter(i => i.StatusDaIdeia === 'Aguardando');
-    const concluidos = estadoChecklist.filter(i => i.StatusDaIdeia !== 'Aguardando');
+    // 1. Aplica a Busca e o Filtro de Categoria
+    let filtrados = estadoChecklist.filter(item => {
+        const matchBusca = (item.Item || '').toLowerCase().includes(busca);
+        const matchCategoria = filtroCat === 'Todas' || item.Categoria === filtroCat;
+        return matchBusca && matchCategoria;
+    });
+
+    // 2. Aplica a Ordenação Alfabética
+    filtrados.sort((a, b) => {
+        if (sortOrder === 'az') return a.Item.localeCompare(b.Item);
+        if (sortOrder === 'za') return b.Item.localeCompare(a.Item);
+        return 0; // 'padrao' não muda a ordem original do banco
+    });
+
+    // 3. Separa os itens em dois grupos (Ativos vs Já Decididos)
+    const pendentes = filtrados.filter(i => i.StatusDaIdeia === 'Aguardando');
+    const concluidos = filtrados.filter(i => i.StatusDaIdeia !== 'Aguardando');
 
     // Função interna para desenhar o card
     const gerarCard = (item) => {
@@ -138,7 +156,6 @@ function renderizarChecklist() {
         let badge = isInList ? `<span class="text-[9px] font-bold bg-green-100 text-green-600 px-2 py-1 rounded uppercase tracking-wider"><i class="fas fa-check mr-1"></i>Na Lista</span>` 
                   : isDiscarded ? `<span class="text-[9px] font-bold bg-gray-200 text-gray-500 px-2 py-1 rounded uppercase tracking-wider"><i class="fas fa-ban mr-1"></i>Descartado</span>` : '';
 
-        // Botões variam se ele está ativo ou finalizado
         const acoes = (!isInList && !isDiscarded) ? `
             <div class="flex gap-2">
                 <button onclick="mudarStatusChecklist(${item.ID}, 'Descartado')" class="px-3 py-1.5 rounded-lg bg-gray-100 text-gray-400 hover:bg-red-50 hover:text-red-500 text-xs font-bold transition-colors shadow-sm"><i class="fas fa-times"></i></button>
@@ -165,6 +182,10 @@ function renderizarChecklist() {
                 <div class="mt-4 pt-3 border-t border-gray-50">${acoes}</div>
             </div>`;
     };
+
+    if (filtrados.length === 0) {
+        return grid.innerHTML = `<div class="col-span-full text-center py-10 text-gray-400">Nenhum item encontrado no Checklist.</div>`;
+    }
 
     // Renderiza os pendentes primeiro
     pendentes.forEach(item => grid.insertAdjacentHTML('beforeend', gerarCard(item)));
