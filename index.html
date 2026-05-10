@@ -164,13 +164,19 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
+                        <div>
                         <label class="text-xs font-bold text-gray-400 ml-1">IMAGEM (LINK OU FOTO)</label>
                         <div class="flex gap-2">
                             <input type="url" id="input-imagem" class="flex-1 p-3 bg-gray-50 border-none rounded-xl outline-none text-sm" placeholder="Cole o link">
-                            <label class="bg-casanova-secondary hover:bg-casanova-primary text-white p-3 rounded-xl cursor-pointer flex items-center justify-center transition-colors shadow-sm" id="btn-upload-lbl" title="Tirar foto ou enviar da galeria">
+                            
+                            <label class="bg-casanova-secondary hover:bg-casanova-primary text-white w-12 rounded-xl cursor-pointer flex items-center justify-center transition-colors shadow-sm" title="Tirar Foto">
                                 <i class="fas fa-camera"></i>
-                                <input type="file" id="input-foto" accept="image/*" class="hidden" onchange="fazerUploadFoto(this)">
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="fazerUploadFoto(this)">
+                            </label>
+
+                            <label class="bg-casanova-primary hover:bg-pink-400 text-white w-12 rounded-xl cursor-pointer flex items-center justify-center transition-colors shadow-sm" title="Escolher da Galeria">
+                                <i class="fas fa-images"></i>
+                                <input type="file" accept="image/*" class="hidden" onchange="fazerUploadFoto(this)">
                             </label>
                         </div>
                         <p id="upload-status" class="text-[10px] text-casanova-primary font-bold mt-1 hidden"><i class="fas fa-spinner fa-spin mr-1"></i>Enviando para o Google Drive...</p>
