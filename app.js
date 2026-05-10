@@ -305,7 +305,7 @@ async function salvarItem(e) {
 window.fazerUploadFoto = async function(input) {
     const file = input.files[0];
     if (!file) return;
-
+    alert("Iniciando upload do arquivo: " + file.name)
     const lbl = document.getElementById('btn-upload-lbl');
     const status = document.getElementById('upload-status');
     const urlInput = document.getElementById('input-imagem');
