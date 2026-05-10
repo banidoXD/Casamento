@@ -300,6 +300,61 @@ async function salvarItem(e) {
         // Se esse item veio do Checklist, avisa lá que já foi comprado/enviado
         const idOrigem = document.getElementById('checklist-origin-id').value;
         if (idOrigem) await mudarStatusChecklist(idOrigem, 'Na Lista de Compras');
+
+// === UPLOAD DE IMAGEM PARA O GOOGLE DRIVE ===
+window.fazerUploadFoto = async function(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const lbl = document.getElementById('btn-upload-lbl');
+    const status = document.getElementById('upload-status');
+    const urlInput = document.getElementById('input-imagem');
+    
+    // Trava o botão e avisa que tá carregando
+    lbl.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+    status.classList.remove('hidden');
+
+    // Lê a foto do celular
+    const reader = new FileReader();
+    reader.onloadend = async function() {
+        const base64data = reader.result;
+        
+        try {
+            // Envia para o nosso script do Google
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: 'upload_image',
+                    base64: base64data,
+                    mimeType: file.type,
+                    filename: "foto_" + Date.now() + "_" + file.name
+                })
+            });
+            
+            const json = await res.json();
+            if (json.status === 'success') {
+                // Sucesso! Preenche o input invisivelmente com o link do Drive
+                urlInput.value = json.url; 
+                status.innerHTML = '<i class="fas fa-check text-green-500 mr-1"></i>Foto enviada e vinculada!';
+                setTimeout(() => status.classList.add('hidden'), 4000);
+            } else {
+                alert("Erro no servidor: " + json.message);
+                status.classList.add('hidden');
+            }
+        } catch(e) {
+            alert("Erro de conexão ao enviar a foto.");
+            status.classList.add('hidden');
+        } finally {
+            // Destrava o botão
+            lbl.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
+            input.value = ''; // Reseta o campo para poder enviar outra se quiser
+            setTimeout(() => status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Enviando para o Google Drive...', 4500);
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+
         
         fecharModal(); carregarItens();
     } catch(e) { alert("Erro de conexão ao salvar."); } 
