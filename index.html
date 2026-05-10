@@ -163,7 +163,20 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div><label class="text-xs font-bold text-gray-400 ml-1">URL DA IMAGEM</label><input type="url" id="input-imagem" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-bold text-gray-400 ml-1">IMAGEM (LINK OU FOTO)</label>
+                        <div class="flex gap-2">
+                            <input type="url" id="input-imagem" class="flex-1 p-3 bg-gray-50 border-none rounded-xl outline-none text-sm" placeholder="Cole o link">
+                            <label class="bg-casanova-secondary hover:bg-casanova-primary text-white p-3 rounded-xl cursor-pointer flex items-center justify-center transition-colors shadow-sm" id="btn-upload-lbl" title="Tirar foto ou enviar da galeria">
+                                <i class="fas fa-camera"></i>
+                                <input type="file" id="input-foto" accept="image/*" class="hidden" onchange="fazerUploadFoto(this)">
+                            </label>
+                        </div>
+                        <p id="upload-status" class="text-[10px] text-casanova-primary font-bold mt-1 hidden"><i class="fas fa-spinner fa-spin mr-1"></i>Enviando para o Google Drive...</p>
+                    </div>
+                    <div><label class="text-xs font-bold text-gray-400 ml-1">TAGS (SEPARAR POR VÍRGULA)</label><input type="text" id="input-tags" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
+                </div>
                     <div><label class="text-xs font-bold text-gray-400 ml-1">TAGS (SEPARAR POR VÍRGULA)</label><input type="text" id="input-tags" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none"></div>
                 </div>
                 <div><label class="text-xs font-bold text-gray-400 ml-1">OBSERVAÇÕES</label><textarea id="input-obs" rows="2" class="w-full p-3 bg-gray-50 border-none rounded-xl outline-none resize-none"></textarea></div>
