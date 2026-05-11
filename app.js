@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbywqBxZtYs16ZsomBUCjwRCToHufEXeYokizzPSVJ6WczFD67FTDy0x7kOegfRjqTxFTw/exec"; // <-- NÃO ESQUEÇA DE COLAR A URL DE NOVO
+const API_URL = "https://script.google.com/macros/s/AKfycbw-kHApNmtN2C-asrJ43y5T0bpUyLVGXhWSlAA_UJG8KckROQeJFPNBvAKrXZ1dWAuHYg/exec"; // <-- NÃO ESQUEÇA DE COLAR A URL DE NOVO
 let estadoCompras = [];
 let estadoChecklist = [];
 let filtroCategoria = 'Todas';
