@@ -313,16 +313,20 @@ async function salvarItem(e) {
 window.fazerUploadFoto = async function(input) {
     const file = input.files[0];
     if (!file) return;
-    
-    console.log("Iniciando upload do arquivo: " + file.name); // Teste no console
 
-    const lbl = input.parentElement; // Trava o botão clicado
+    const lbl = input.parentElement; // Trava o botão clicado da câmera/galeria
     const status = document.getElementById('upload-status');
     const urlInput = document.getElementById('input-imagem');
+    const btnSalvar = document.querySelector('#item-form button[type="submit"]'); // Pega o botão de salvar gigante
     
-    // Trava o botão e avisa que tá carregando
+    // Trava os ícones da câmera e mostra status
     lbl.classList.add('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
     status.classList.remove('hidden');
+
+    // TRAVA O BOTÃO DE SALVAR PARA EVITAR ACIDENTES
+    btnSalvar.disabled = true;
+    btnSalvar.innerHTML = '<i class="fas fa-camera fa-fade mr-2"></i>ESPERE A FOTO...';
+    btnSalvar.classList.add('opacity-50', 'cursor-not-allowed');
 
     // Lê a foto do celular
     const reader = new FileReader();
@@ -343,9 +347,8 @@ window.fazerUploadFoto = async function(input) {
             
             const json = await res.json();
             if (json.status === 'success') {
-                // Sucesso! Preenche o input invisivelmente com o link do Drive
                 urlInput.value = json.url; 
-                status.innerHTML = '<i class="fas fa-check text-green-500 mr-1"></i>Foto enviada e vinculada!';
+                status.innerHTML = '<i class="fas fa-check text-green-500 mr-1"></i>Foto vinculada!';
                 setTimeout(() => status.classList.add('hidden'), 4000);
             } else {
                 alert("Erro no servidor: " + json.message);
@@ -355,15 +358,19 @@ window.fazerUploadFoto = async function(input) {
             alert("Erro de conexão ao enviar a foto.");
             status.classList.add('hidden');
         } finally {
-            // Destrava o botão
+            // Destrava a câmera
             lbl.classList.remove('opacity-50', 'cursor-not-allowed', 'pointer-events-none');
-            input.value = ''; // Reseta o campo para poder enviar outra se quiser
+            input.value = ''; 
             setTimeout(() => status.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>Enviando para o Google Drive...', 4500);
+
+            // DESTRAVA O BOTÃO DE SALVAR
+            btnSalvar.disabled = false;
+            btnSalvar.innerHTML = 'SALVAR ITEM';
+            btnSalvar.classList.remove('opacity-50', 'cursor-not-allowed');
         }
     };
     reader.readAsDataURL(file);
 }
-
 function atualizarDashboard() {
     let est = 0, pago = 0, div = 0, prox = 0, concl = 0;
     estadoCompras.forEach(i => {
