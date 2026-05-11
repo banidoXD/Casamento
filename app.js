@@ -300,13 +300,23 @@ async function salvarItem(e) {
         // Se esse item veio do Checklist, avisa lá que já foi comprado/enviado
         const idOrigem = document.getElementById('checklist-origin-id').value;
         if (idOrigem) await mudarStatusChecklist(idOrigem, 'Na Lista de Compras');
+        
+        fecharModal(); carregarItens();
+    } catch(e) { 
+        alert("Erro de conexão ao salvar."); 
+    } finally { 
+        btn.innerHTML = 'SALVAR ITEM'; btn.disabled = false; 
+    }
+}
 
-// === UPLOAD DE IMAGEM PARA O GOOGLE DRIVE ===
+// === UPLOAD DE IMAGEM PARA O GOOGLE DRIVE (AGORA SEPARADA E LIVRE!) ===
 window.fazerUploadFoto = async function(input) {
     const file = input.files[0];
     if (!file) return;
-    alert("Iniciando upload do arquivo: " + file.name)
-    const lbl = document.getElementById('btn-upload-lbl');
+    
+    console.log("Iniciando upload do arquivo: " + file.name); // Teste no console
+
+    const lbl = input.parentElement; // Trava o botão clicado
     const status = document.getElementById('upload-status');
     const urlInput = document.getElementById('input-imagem');
     
@@ -352,13 +362,6 @@ window.fazerUploadFoto = async function(input) {
         }
     };
     reader.readAsDataURL(file);
-}
-
-
-        
-        fecharModal(); carregarItens();
-    } catch(e) { alert("Erro de conexão ao salvar."); } 
-    finally { btn.innerHTML = 'SALVAR ITEM'; btn.disabled = false; }
 }
 
 function atualizarDashboard() {
